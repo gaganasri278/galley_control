@@ -25,7 +25,6 @@ def main() -> None:
     admin_cmd.add_argument("--email", required=True)
     admin_cmd.add_argument("--username", required=True)
     admin_cmd.add_argument("--full-name", default="Platform Administrator")
-    admin_cmd.add_argument("--password", required=True)
 
     reset_admin_cmd = sub.add_parser(
         "reset-admin-password",
@@ -41,6 +40,15 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "create-admin":
+        password = getpass("New admin password: ")
+        confirm_password = getpass("Confirm new admin password: ")
+        if password != confirm_password:
+            raise SystemExit("Passwords do not match.")
+        try:
+            validate_password_strength(password)
+        except HTTPException as exc:
+            raise SystemExit(str(exc.detail)) from exc
+
         init_db()
         with db_session() as db:
             role_map = ensure_roles_and_permissions(db)
@@ -58,7 +66,7 @@ def main() -> None:
                     username=args.username.strip().lower(),
                     email=args.email.strip().lower(),
                     full_name=args.full_name.strip(),
-                    password_hash=hash_password(args.password),
+                    password_hash=hash_password(password),
                     role="admin",
                     role_id=role_map.get("admin"),
                     outlet_id=None,

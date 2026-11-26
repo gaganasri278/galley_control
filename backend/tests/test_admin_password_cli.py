@@ -86,3 +86,59 @@ def test_reset_admin_password_rejects_mismatched_confirmation(
     with cli_database() as db:
         admin = db.execute(select(User).where(User.email == "admin@example.com")).scalar_one()
         assert verify_password("Oldpass123", admin.password_hash)
+
+
+def test_create_admin_prompts_securely_and_stores_password_hash(
+    cli_database, monkeypatch
+):
+    monkeypatch.setattr(cli, "ensure_roles_and_permissions", lambda _db: {"admin": None})
+    monkeypatch.setattr(cli, "getpass", lambda _prompt: "Newpass123")
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "galley-control",
+            "create-admin",
+            "--email",
+            "newadmin@example.com",
+            "--username",
+            "newadmin",
+            "--full-name",
+            "New Admin",
+        ],
+    )
+
+    cli.main()
+
+    with cli_database() as db:
+        admin = db.execute(
+            select(User).where(User.email == "newadmin@example.com")
+        ).scalar_one()
+        assert admin.role == "admin"
+        assert verify_password("Newpass123", admin.password_hash)
+        assert admin.password_hash != "Newpass123"
+
+
+def test_create_admin_rejects_mismatched_password_confirmation(
+    cli_database, monkeypatch
+):
+    passwords = iter(("Newpass123", "Different123"))
+    monkeypatch.setattr(cli, "getpass", lambda _prompt: next(passwords))
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "galley-control",
+            "create-admin",
+            "--email",
+            "newadmin@example.com",
+            "--username",
+            "newadmin",
+        ],
+    )
+
+    with pytest.raises(SystemExit, match="Passwords do not match"):
+        cli.main()
+
+    with cli_database() as db:
+        assert db.execute(
+            select(User).where(User.email == "newadmin@example.com")
+        ).scalar_one_or_none() is None
