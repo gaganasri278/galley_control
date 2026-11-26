@@ -475,9 +475,9 @@ export default function ManagerDashboard() {
                   </div>
                   <p className="text-slate-600 dark:text-slate-400 mt-0.5">{rev.comment}</p>
                 </div>
-                {Boolean(rev.is_resolved) || rev.rating >= 4 ? (
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> {rev.rating >= 4 ? "Positive" : "Resolved"}
+                {rev.rating >= 4 || rev.sentiment === "POSITIVE" ? null : Boolean(rev.is_resolved) ? (
+                  <span className="text-[10px] text-emerald-600 font-bold shrink-0 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" /> Resolved
                   </span>
                 ) : (
                   <button
