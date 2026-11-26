@@ -279,6 +279,24 @@ export default function CounterScanner() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              {cameras.length > 1 && (
+                <select
+                  value={selectedCameraId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedCameraId(id);
+                    startCamera(id);
+                  }}
+                  className="text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1.5 text-slate-700 dark:text-slate-300 focus:outline-none"
+                >
+                  {cameras.map((c, idx) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label || `Camera ${idx + 1}`}
+                    </option>
+                  ))}
+                </select>
+              )}
+
               <label className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold inline-flex items-center gap-1.5 hover:bg-slate-50 cursor-pointer transition shadow-xs">
                 <Upload className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Upload QR Image</span>
