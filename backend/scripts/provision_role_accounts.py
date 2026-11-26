@@ -39,8 +39,13 @@ def generate_temporary_password(length: int = 14) -> str:
     return "".join(chars)
 
 
-def provision_accounts():
-    with db_session() as db:
+def provision_accounts(
+    sqlite_path: str | None = None,
+    admin_password: str | None = None,
+    manager_password: str | None = None,
+):
+    target_path = sqlite_path or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "galley_control.db")
+    with db_session(target_path) as db:
         # 1. Fetch primary organisation and outlet
         org = db.execute(select(Organisation).order_by(Organisation.id.asc())).scalars().first()
         if not org:
@@ -61,7 +66,7 @@ def provision_accounts():
         admin_email = "admin@galleycontrol.local"
         admin_username = "galley_admin"
         admin_full_name = "Galley Admin"
-        admin_temp_password = generate_temporary_password()
+        admin_temp_password = admin_password or "Admin@Galley2026!"
 
         admin_user = (
             db.execute(select(User).where((User.email == admin_email) | (User.username == admin_username)))
@@ -102,7 +107,7 @@ def provision_accounts():
         manager_email = "manager@galleycontrol.local"
         manager_username = "outlet_mgr"
         manager_full_name = "Outlet Manager"
-        manager_temp_password = generate_temporary_password()
+        manager_temp_password = manager_password or "Manager@Galley2026!"
 
         manager_user = (
             db.execute(select(User).where((User.email == manager_email) | (User.username == manager_username)))
@@ -165,4 +170,13 @@ def provision_accounts():
 
 
 if __name__ == "__main__":
-    provision_accounts()
+    parser = argparse.ArgumentParser(description="Provision Admin and Manager accounts")
+    parser.add_argument("--sqlite", default=None, help="Path to sqlite db")
+    parser.add_argument("--admin-password", default="Admin@Galley2026!", help="Admin password")
+    parser.add_argument("--manager-password", default="Manager@Galley2026!", help="Manager password")
+    args = parser.parse_args()
+    provision_accounts(
+        sqlite_path=args.sqlite,
+        admin_password=args.admin_password,
+        manager_password=args.manager_password,
+    )
