@@ -132,6 +132,10 @@ def readiness_probe():
         db.execute(text("SELECT 1"))
     return {"ready": True, "dialect": get_database_dialect()}
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "galley_control"}
+
 
 app.include_router(auth.router)
 app.include_router(organisations.router)
