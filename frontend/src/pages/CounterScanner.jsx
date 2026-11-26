@@ -157,21 +157,33 @@ export default function CounterScanner() {
       if (seq !== sessionSeqRef.current) return;
 
       try {
-        let devs = cameras;
-        if (!devs.length) {
+        if (navigator?.mediaDevices?.getUserMedia) {
           try {
-            devs = await Html5Qrcode.getCameras();
+            const testStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            testStream.getTracks().forEach((track) => track.stop());
+          } catch (permErr) {
             if (seq !== sessionSeqRef.current) return;
-            setCameras(devs || []);
-          } catch {
-            devs = [];
+            setStartingCamera(false);
+            setCameraError(classifyCameraError(permErr));
+            return;
           }
+        }
+
+        let devs = cameras;
+        try {
+          devs = await Html5Qrcode.getCameras();
+          if (seq !== sessionSeqRef.current) return;
+          const validDevs = (devs || []).filter((d) => d && d.id);
+          setCameras(validDevs);
+          devs = validDevs;
+        } catch {
+          devs = [];
         }
 
         const preferred =
           explicitCameraId ||
           selectedCameraId ||
-          (devs.length ? devs[0].id : { facingMode: "environment" });
+          (devs.length ? devs[0].id : { facingMode: "user" });
 
         const qr = new Html5Qrcode("qr-reader-region", { verbose: false });
         scannerRef.current = qr;
@@ -200,7 +212,7 @@ export default function CounterScanner() {
           }
           try {
             await qr.start(
-              { facingMode: "user" },
+              { facingMode: "environment" },
               scanConfig,
               onDecoded,
               () => {}
@@ -232,13 +244,11 @@ export default function CounterScanner() {
   };
 
   useEffect(() => {
-    startCamera();
     return () => {
       sessionSeqRef.current += 1;
       stopCameraInstance();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [stopCameraInstance]);
 
   const handleImageFileScan = async (e) => {
     const file = e.target.files?.[0];
