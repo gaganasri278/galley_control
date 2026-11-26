@@ -73,15 +73,16 @@ npm run dev
 
 ---
 
-## Production Deployment Guide (Render + Managed PostgreSQL + Vercel/Netlify)
+## Production Deployment Guide (Render + Managed PostgreSQL)
 
 1. **Managed PostgreSQL (Neon / Supabase / Render Postgres):**
    - Create a PostgreSQL database and copy its `DATABASE_URL`.
    - Run `alembic upgrade head` against `DATABASE_URL`.
    - Provision initial admin: `python -m app.cli create-admin --email admin@yourdomain.com --username admin --password "<StrongPass>"` (or set `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD` once).
    - Seed campus outlets/menus cleanly without demo users: `python -m app.cli seed-catalog`.
-2. **Backend (Render via `render.yaml` or `backend/Dockerfile`):**
-   - Set `APP_ENV=production`, `DATABASE_URL`, `AUTH_SECRET`, `LLM_PROVIDER`, `LLM_API_KEY`, `CORS_ORIGINS`, `FRONTEND_APP_URL`, `COOKIE_SECURE=true`, `COOKIE_SAMESITE=none` (or `lax` when `/api/*` is proxied same-origin), and optional `SMTP_*` variables.
-3. **Frontend (Vercel via `frontend/vercel.json` or Netlify via `frontend/netlify.toml`):**
-   - Replace `REPLACE_WITH_YOUR_BACKEND_DOMAIN` in `vercel.json` / `netlify.toml` with your deployed FastAPI hostname so `/api/*` proxies cleanly same-origin alongside SPA route rewrites.
-   - Build command: `npm run build`, output directory: `dist`.
+2. **Render (frontend and backend in one service):**
+   - Create a Render Blueprint from the repository root using `render.yaml`. The root `Dockerfile` builds the React frontend and packages it with FastAPI; Render serves the UI and API from the same URL.
+   - Set `APP_ENV=production`, `DATABASE_URL`, `AUTH_SECRET`, `LLM_PROVIDER`, `LLM_API_KEY`, `CORS_ORIGINS`, `FRONTEND_APP_URL`, `COOKIE_SECURE=true`, `COOKIE_SAMESITE=lax`, and optional `SMTP_*` variables. Set `FRONTEND_APP_URL` and `CORS_ORIGINS` to the Render service URL.
+   - The service root serves the frontend. API endpoints remain under `/api`, and client-side routes such as `/login` are served by the React app.
+
+To host the frontend separately on Vercel or Netlify instead, use `frontend/vercel.json` or `frontend/netlify.toml` and replace `REPLACE_WITH_YOUR_BACKEND_DOMAIN` with the deployed FastAPI hostname.

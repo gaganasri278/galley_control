@@ -8,7 +8,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func, select, text
 
@@ -33,6 +33,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("galley_control")
+FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
 
 @asynccontextmanager
@@ -132,11 +133,6 @@ def readiness_probe():
         db.execute(text("SELECT 1"))
     return {"ready": True, "dialect": get_database_dialect()}
 
-@app.get("/")
-def root():
-    return {"status": "ok", "service": "galley_control"}
-
-
 app.include_router(auth.router)
 app.include_router(organisations.router)
 app.include_router(catalog.router)
@@ -146,3 +142,32 @@ app.include_router(reviews.router)
 app.include_router(agents.router)
 app.include_router(dashboard.router)
 app.include_router(admin.router)
+
+
+@app.get("/")
+def frontend_root():
+    index_file = FRONTEND_DIST / "index.html"
+    if index_file.is_file():
+        return FileResponse(index_file)
+    return {"status": "ok", "service": "galley_control"}
+
+
+@app.get("/{frontend_path:path}")
+def frontend_route(frontend_path: str):
+    if frontend_path == "api" or frontend_path.startswith(("api/", "static/")):
+        raise HTTPException(status_code=404, detail="Not found")
+
+    index_file = FRONTEND_DIST / "index.html"
+    if not index_file.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+
+    frontend_root = FRONTEND_DIST.resolve()
+    requested_file = (FRONTEND_DIST / frontend_path).resolve()
+    try:
+        requested_file.relative_to(frontend_root)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Not found") from None
+
+    if requested_file.is_file():
+        return FileResponse(requested_file)
+    return FileResponse(index_file)
