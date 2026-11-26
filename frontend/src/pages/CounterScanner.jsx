@@ -303,15 +303,19 @@ export default function CounterScanner() {
           {cameraError && (
             <div
               role="alert"
-              className="rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-4 text-xs text-amber-800 dark:text-amber-200 space-y-2"
+              className="rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-4 text-xs text-amber-800 dark:text-amber-200 space-y-2.5"
             >
-              <div>{cameraError}</div>
+              <div className="font-medium">{cameraError}</div>
+              <div className="text-[11px] text-amber-700/80 dark:text-amber-300/80 space-y-1 bg-amber-100/50 dark:bg-amber-900/30 p-2.5 rounded-xl border border-amber-200/60 dark:border-amber-800/60">
+                <p><strong>How to enable camera:</strong> In your browser address bar next to the website URL (left side), click the <strong>tune / lock icon</strong> (or the camera icon on the right), switch <strong>Camera</strong> to <strong>Allow</strong>, then refresh.</p>
+                <p><strong>No camera needed:</strong> You can also click any order token in <strong>Kitchen Active Tickets Quick-Fill</strong> below to test verification immediately!</p>
+              </div>
               <button
                 type="button"
                 onClick={() => startCamera(selectedCameraId || null)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline pt-0.5"
               >
-                <RefreshCw className="w-3 h-3" />
+                <RefreshCw className="w-3.5 h-3.5" />
                 <span>Retry Camera Permission</span>
               </button>
             </div>
