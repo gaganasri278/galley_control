@@ -850,6 +850,7 @@ def orchestrate_review_to_action(
     org_id = outlet.organisation_id
     classification = analyze_review_with_ai(rating, comment)
 
+    is_positive = rating >= 4 or classification["sentiment"] == "POSITIVE"
     rev = Review(
         organisation_id=org_id,
         outlet_id=outlet_id,
@@ -860,7 +861,7 @@ def orchestrate_review_to_action(
         comment=comment.strip(),
         sentiment=classification["sentiment"],
         category=classification["category"],
-        is_resolved=False,
+        is_resolved=is_positive,
         is_sample=False,
     )
     db.add(rev)

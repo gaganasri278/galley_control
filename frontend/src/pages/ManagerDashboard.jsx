@@ -475,18 +475,18 @@ export default function ManagerDashboard() {
                   </div>
                   <p className="text-slate-600 dark:text-slate-400 mt-0.5">{rev.comment}</p>
                 </div>
-                {rev.is_resolved === 0 ? (
+                {Boolean(rev.is_resolved) || rev.rating >= 4 ? (
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" /> {rev.rating >= 4 ? "Positive" : "Resolved"}
+                  </span>
+                ) : (
                   <button
                     type="button"
                     onClick={() => handleResolveReview(rev.id)}
-                    className="shrink-0 px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-bold hover:bg-emerald-200 text-[11px]"
+                    className="shrink-0 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-bold hover:bg-amber-500/25 text-[11px]"
                   >
                     Resolve
                   </button>
-                ) : (
-                  <span className="text-[10px] text-emerald-600 font-bold shrink-0">
-                    Resolved
-                  </span>
                 )}
               </div>
             ))}
