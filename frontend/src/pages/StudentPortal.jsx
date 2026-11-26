@@ -415,7 +415,7 @@ export default function StudentPortal() {
                   <span className={`w-2 h-2 rounded-full ${o.status === "OPEN" ? "bg-emerald-400" : "bg-amber-400"}`} />
                   <span>{o.name}</span>
                   <span className="text-[10px] opacity-80">
-                    (~{o.avg_prep_minutes}m prep)
+                    {o.status === "CLOSED" ? "(Closed)" : `(~${o.avg_prep_minutes}m prep)`}
                   </span>
                 </button>
               );
@@ -637,11 +637,12 @@ export default function StudentPortal() {
                         ) : (
                           <button
                             type="button"
+                            disabled={activeOutlet?.status === "CLOSED"}
                             onClick={() => addToCart(item)}
-                            className="w-full py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm shadow-indigo-600/20 flex items-center justify-center gap-1.5"
+                            className="w-full py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm shadow-indigo-600/20 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Plus className="w-3.5 h-3.5" />
-                            <span>Add to Order</span>
+                            <span>{activeOutlet?.status === "CLOSED" ? "Kitchen Closed" : "Add to Order"}</span>
                           </button>
                         )}
                       </div>
@@ -800,6 +801,13 @@ export default function StudentPortal() {
                 </div>
               )}
 
+              {/* Closed Kitchen Warning */}
+              {activeOutlet?.status === "CLOSED" && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs text-amber-700 dark:text-amber-300 font-medium text-center">
+                  {activeOutlet.name} is currently closed and not accepting orders.
+                </div>
+              )}
+
               {/* Total & Checkout Button */}
               <div className="pt-2 flex items-center justify-between">
                 <div>
@@ -810,10 +818,14 @@ export default function StudentPortal() {
                 </div>
                 <button
                   type="submit"
-                  disabled={cart.length === 0 || submitting}
+                  disabled={cart.length === 0 || submitting || activeOutlet?.status === "CLOSED"}
                   className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting ? "Placing Order..." : "Confirm & Pay"}
+                  {submitting
+                    ? "Placing Order..."
+                    : activeOutlet?.status === "CLOSED"
+                    ? "Kitchen Closed"
+                    : "Confirm & Pay"}
                 </button>
               </div>
             </form>
