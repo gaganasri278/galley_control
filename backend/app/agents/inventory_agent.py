@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sqlalchemy import func, select
+from sqlalchemy import Numeric, cast, func, select
 from sqlalchemy.orm import Session
 
 from app.models import MenuItem, Order, Outlet
@@ -53,7 +53,9 @@ def get_inventory_intelligence(
         select(
             func.coalesce(Order.scheduled_slot, "ASAP").label("slot"),
             func.count(Order.id).label("order_count"),
-            func.round(func.coalesce(func.sum(Order.total_amount), 0.0), 2).label("revenue"),
+            func.round(
+                cast(func.coalesce(func.sum(Order.total_amount), 0.0), Numeric), 2
+            ).label("revenue"),
         )
         .where(Order.is_sample.is_(True))
         .group_by(func.coalesce(Order.scheduled_slot, "ASAP"))

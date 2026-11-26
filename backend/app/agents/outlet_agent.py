@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sqlalchemy import case, func, select
+from sqlalchemy import Numeric, case, cast, func, select
 from sqlalchemy.orm import Session
 
 from app.models import Order, Outlet, OutletPerformanceSnapshot, Review
@@ -42,16 +42,23 @@ def evaluate_outlets(
                     func.sum(case((Order.order_status == "CANCELLED", 1), else_=0)), 0
                 ).label("cancelled_orders"),
                 func.round(
-                    func.coalesce(
-                        func.sum(
-                            case((Order.order_status != "CANCELLED", Order.total_amount), else_=0.0)
+                    cast(
+                        func.coalesce(
+                            func.sum(
+                                case((Order.order_status != "CANCELLED", Order.total_amount), else_=0.0)
+                            ),
+                            0.0,
                         ),
-                        0.0,
+                        Numeric,
                     ),
                     2,
                 ).label("total_sales"),
                 func.round(
-                    func.coalesce(func.avg(Order.estimated_wait_minutes), o.avg_prep_minutes), 1
+                    cast(
+                        func.coalesce(func.avg(Order.estimated_wait_minutes), o.avg_prep_minutes),
+                        Numeric,
+                    ),
+                    1,
                 ).label("avg_completion_minutes"),
             ).where(Order.outlet_id == oid)
         ).one()
@@ -62,7 +69,9 @@ def evaluate_outlets(
                 func.coalesce(
                     func.sum(case((Review.sentiment == "NEGATIVE", 1), else_=0)), 0
                 ).label("neg_cnt"),
-                func.round(func.coalesce(func.avg(Review.rating), 0.0), 2).label("avg_rating"),
+                func.round(
+                    cast(func.coalesce(func.avg(Review.rating), 0.0), Numeric), 2
+                ).label("avg_rating"),
             ).where(Review.outlet_id == oid)
         ).one()
 

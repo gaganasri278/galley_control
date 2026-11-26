@@ -114,6 +114,10 @@ def test_unauthorised_dashboard_api_access_blocked(client):
     admin_dash = client.get("/api/admin/overview", headers=adm_h)
     assert admin_dash.status_code == 200
 
+    # Admin platform dashboard uses PostgreSQL numeric rounding on float aggregates.
+    platform_summary = client.get("/api/dashboard/summary", headers=adm_h)
+    assert platform_summary.status_code == 200, platform_summary.text
+
 
 def test_session_persistence_and_logout_across_roles(client):
     """Test 5: Session persistence across all three roles and token invalidation on logout."""

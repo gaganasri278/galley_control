@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sqlalchemy import case, func, select
+from sqlalchemy import Numeric, case, cast, func, select
 from sqlalchemy.orm import Session
 
 from app.models import Order, Outlet
@@ -32,7 +32,9 @@ def build_analytics_report(
             func.count(Order.id).label("order_cnt"),
             func.coalesce(func.sum(case((Order.is_sample.is_(True), 1), else_=0)), 0).label("sample_cnt"),
             func.coalesce(func.sum(case((Order.is_sample.is_(False), 1), else_=0)), 0).label("live_cnt"),
-            func.round(func.coalesce(func.sum(Order.total_amount), 0.0), 2).label("sales"),
+            func.round(
+                cast(func.coalesce(func.sum(Order.total_amount), 0.0), Numeric), 2
+            ).label("sales"),
         )
         .where(Order.order_status != "CANCELLED")
     )
