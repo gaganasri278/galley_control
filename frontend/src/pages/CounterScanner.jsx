@@ -8,6 +8,7 @@ import {
   QrCode,
   RefreshCw,
   ShieldAlert,
+  Upload,
 } from "lucide-react";
 import { useOutletContext, useSearchParams } from "react-router-dom";
 import {
@@ -239,6 +240,24 @@ export default function CounterScanner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleImageFileScan = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCameraError("");
+    try {
+      const html5Qr = new Html5Qrcode("qr-reader-region", { verbose: false });
+      const decodedText = await html5Qr.scanFile(file, false);
+      setTokenInput(decodedText);
+      await runVerification(decodedText);
+    } catch {
+      setCameraError(
+        "Could not detect a valid QR code in the selected image. Please upload a clear QR code image or enter the token manually."
+      );
+    } finally {
+      e.target.value = "";
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       {/* Left: Webcam QR Scanner + Quick Verification */}
@@ -259,7 +278,18 @@ export default function CounterScanner() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold inline-flex items-center gap-1.5 hover:bg-slate-50 cursor-pointer transition shadow-xs">
+                <Upload className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Upload QR Image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageFileScan}
+                />
+              </label>
+
               {scanning ? (
                 <button
                   type="button"
