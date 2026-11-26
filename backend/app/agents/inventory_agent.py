@@ -49,16 +49,17 @@ def get_inventory_intelligence(
     low_stock = [i for i in items if 0 < i["stock_qty"] <= 12]
     high_stock_perishables = [i for i in items if i["stock_qty"] >= 28]
 
+    slot_expr = func.coalesce(Order.scheduled_slot, "ASAP")
     slot_stmt = (
         select(
-            func.coalesce(Order.scheduled_slot, "ASAP").label("slot"),
+            slot_expr.label("slot"),
             func.count(Order.id).label("order_count"),
             func.round(
                 cast(func.coalesce(func.sum(Order.total_amount), 0.0), Numeric), 2
             ).label("revenue"),
         )
         .where(Order.is_sample.is_(True))
-        .group_by(func.coalesce(Order.scheduled_slot, "ASAP"))
+        .group_by(slot_expr)
         .order_by(func.count(Order.id).desc())
     )
     if organisation_id is not None:
