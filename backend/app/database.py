@@ -99,11 +99,11 @@ DEFAULT_MENU_MEDIA: dict[str, tuple[str, str]] = {
     ),
     "Idli Vada Combo": (
         "Steamed fluffy rice cakes and crispy golden medu vada served with traditional lentil sambar and chutneys.",
-        "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=80",
+        "/static/uploads/menu/idli_vada_combo.jpg",
     ),
     "Paneer Roll": (
         "Char-grilled spiced cottage cheese chunks wrapped in flaky whole wheat paratha with mint relish.",
-        "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=600&auto=format&fit=crop&q=80",
+        "/static/uploads/menu/paneer_roll.jpeg",
     ),
     "Veg Fried Rice": (
         "Wok-tossed long-grain basmati rice with crunchy seasonal vegetables, scallions and aromatic Asian sauces.",
@@ -111,7 +111,7 @@ DEFAULT_MENU_MEDIA: dict[str, tuple[str, str]] = {
     ),
     "Veg Hakka Noodles": (
         "Classic street-style stir-fried wheat noodles with julienne veggies, garlic, soy sauce and white pepper.",
-        "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&auto=format&fit=crop&q=80",
+        "/static/uploads/menu/veg_hakka_noodles.jpg",
     ),
     "Cold Coffee": (
         "Thick, creamy chilled espresso blend infused with vanilla cream and chocolate drizzle.",
@@ -123,7 +123,7 @@ DEFAULT_MENU_MEDIA: dict[str, tuple[str, str]] = {
     ),
     "Chicken Tikka Wrap": (
         "Tender tandoori chicken tikka cubes with pickled onions, crisp lettuce and spicy mayo in soft tortilla.",
-        "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=600&auto=format&fit=crop&q=80",
+        "/static/uploads/menu/chicken_tikka_wrap.jpg",
     ),
     "Fresh Lime Soda": (
         "Zesty fresh lime juice with club soda, rock salt, mint and organic sugar syrup.",
@@ -139,7 +139,7 @@ DEFAULT_MENU_MEDIA: dict[str, tuple[str, str]] = {
     ),
     "Ginger Chai": (
         "Strong freshly brewed Assam CTC tea simmered with crushed ginger root, cardamom and whole milk.",
-        "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=600&auto=format&fit=crop&q=80",
+        "/static/uploads/menu/ginger_chai.jpg",
     ),
 }
 
